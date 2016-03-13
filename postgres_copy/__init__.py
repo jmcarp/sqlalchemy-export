@@ -7,7 +7,7 @@ from sqlalchemy.dialects import postgresql
 
 __version__ = '0.1.0'
 
-def export(select, engine, fp, **flags):
+def copy_to(select, engine, fp, **flags):
     """Export a query or select to a file. For flags, see the PostgreSQL
     documentation at http://www.postgresql.org/docs/9.5/static/sql-copy.html.
 

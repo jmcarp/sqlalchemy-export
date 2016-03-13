@@ -4,7 +4,7 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 
-from sqlalchemy_export import export
+from postgres_copy import copy_to
 
 Base = declarative_base()
 engine = sa.create_engine('postgresql:///export-test')
@@ -41,14 +41,14 @@ class TestExport:
 
     def test_export_query(self, session, objects):
         sio = io.StringIO()
-        export(session.query(Album), session.connection().engine, sio)
+        copy_to(session.query(Album), session.connection().engine, sio)
         lines = sio.getvalue().strip().split('\n')
         assert len(lines) == 3
         assert lines[0].split('\t') == [str(objects[0].id), objects[0].name]
 
     def test_export_table(self, session, objects):
         sio = io.StringIO()
-        export(Album.__table__.select(), session.connection().engine, sio)
+        copy_to(Album.__table__.select(), session.connection().engine, sio)
         lines = sio.getvalue().strip().split('\n')
         assert len(lines) == 3
         assert lines[0].split('\t') == [str(objects[0].id), objects[0].name]
@@ -56,7 +56,7 @@ class TestExport:
     def test_export_csv(self, session, objects):
         sio = io.StringIO()
         flags = {'format': 'csv', 'header': True}
-        export(session.query(Album), session.connection().engine, sio, **flags)
+        copy_to(session.query(Album), session.connection().engine, sio, **flags)
         lines = sio.getvalue().strip().split('\n')
         assert len(lines) == 4
         assert lines[0].split(',') == ['id', 'name']

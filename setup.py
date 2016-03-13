@@ -32,20 +32,20 @@ def read(fname):
     return content
 
 setup(
-    name='sqlalchemy-export',
-    version=find_version('sqlalchemy_export/__init__.py'),
-    description='Bulk export utilities for SQLAlchemy',
+    name='sqlalchemy-postgres-copy',
+    version=find_version('postgres_copy/__init__.py'),
+    description='Utilities for using PostgreSQL COPY with SQLAlchemy',
     long_description=read('README.rst'),
     author='Joshua Carp',
     author_email='jm.carp@gmail.com',
-    url='https://github.com/jmcarp/sqlalchemy-export',
+    url='https://github.com/jmcarp/sqlalchemy-postgres-copy',
     packages=find_packages(exclude=('test*', )),
-    package_dir={'sqlalchemy_export': 'sqlalchemy_export'},
+    package_dir={'postgres_copy': 'postgres_copy'},
     include_package_data=True,
     install_requires=REQUIRES,
     license=read('LICENSE'),
     zip_safe=False,
-    keywords='sqlalchemy-export',
+    keywords=('sqlalchemy', 'postgresql'),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
