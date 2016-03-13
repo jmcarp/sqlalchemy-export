@@ -6,6 +6,7 @@ from setuptools import find_packages
 
 REQUIRES = [
     'six',
+    'psycopg2',
     'sqlalchemy',
 ]
 
