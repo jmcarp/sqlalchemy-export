@@ -48,25 +48,24 @@ def format_flag(value):
         else repr(value)
     )
 
-def label_entities(query):
-    entities = sum(
-        [extract_entities(defn) for defn in query.column_definitions],
+def query_entities(query):
+    return sum(
+        [desc_entities(desc) for desc in query.column_descriptions],
         []
     )
-    return query.with_entities(*entities)
 
-def extract_entities(defn):
-    expr = defn['expr']
+def desc_entities(desc):
+    expr, name = desc['expr'], desc['name']
     if isinstance(expr, Mapper):
-        return extract_mapper_entities(expr)
+        return mapper_entities(expr)
     elif is_model(expr):
-        return extract_mapper_entities(expr.__mapper__)
+        return mapper_entities(expr.__mapper__)
     elif isinstance(expr, ColumnElement):
-        return expr
+        return expr.label(name)
     else:
         raise ValueError()
 
-def extract_mapper_entities(mapper):
+def mapper_entities(mapper):
     model = mapper.class_
     return [
         getattr(model, prop.key).label(prop.key)
