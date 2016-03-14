@@ -15,4 +15,5 @@ install:
   - travis_retry pip install -U .
   - travis_retry pip install -U -r dev-requirements.txt
 script:
-  py.test
+  - py.test
+  - flake8 .

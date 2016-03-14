@@ -1,1 +1,6 @@
 pytest
+flake8
+
+invoke
+twine
+wheel
