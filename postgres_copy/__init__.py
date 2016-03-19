@@ -1,8 +1,8 @@
 import six
 
-from sqlalchemy.sql import ColumnElement
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Mapper, class_mapper
+from sqlalchemy.sql.operators import ColumnOperators
 from sqlalchemy.dialects import postgresql
 
 __version__ = '0.1.0'
@@ -72,6 +72,16 @@ def format_flag(value):
         else repr(value)
     )
 
+def relabel_query(query):
+    """Relabel query entities according to mappings defined in the SQLAlchemy
+    ORM. Useful when table column names differ from corresponding attribute
+    names. See http://docs.sqlalchemy.org/en/latest/orm/mapping_columns.html
+    for details.
+
+    :param query: SQLAlchemy query
+    """
+    return query.with_entities(*query_entities(query))
+
 def query_entities(query):
     return sum(
         [desc_entities(desc) for desc in query.column_descriptions],
@@ -84,10 +94,10 @@ def desc_entities(desc):
         return mapper_entities(expr)
     elif is_model(expr):
         return mapper_entities(expr.__mapper__)
-    elif isinstance(expr, ColumnElement):
-        return expr.label(name)
+    elif isinstance(expr, ColumnOperators):
+        return [expr.label(name)]
     else:
-        raise ValueError()
+        raise ValueError('Unrecognized query entity {!r}'.format(expr))
 
 def mapper_entities(mapper):
     model = mapper.class_

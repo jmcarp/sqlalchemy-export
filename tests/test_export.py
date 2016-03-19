@@ -4,14 +4,14 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 
-from postgres_copy import copy_to, copy_from
+from postgres_copy import copy_to, copy_from, relabel_query
 
 Base = declarative_base()
-engine = sa.create_engine('postgresql:///export-test')
+engine = sa.create_engine('postgresql:///copy-test')
 
 class Album(Base):
     __tablename__ = 'album'
-    id = sa.Column(sa.Integer, primary_key=True)
+    id = sa.Column('aid', sa.Integer, primary_key=True)
     name = sa.Column(sa.Text)
 
 @pytest.fixture()
@@ -57,14 +57,36 @@ class TestCopyTo:
         copy_to(session.query(Album), sio, session.connection().engine, **flags)
         lines = sio.getvalue().strip().split('\n')
         assert len(lines) == 4
+        assert lines[0].split(',') == ['aid', 'name']
+        assert lines[1].split(',') == [str(objects[0].id), objects[0].name]
+
+class TestCopyRename:
+
+    def test_rename_model(self, session, objects):
+        sio = io.StringIO()
+        flags = {'format': 'csv', 'header': True}
+        query = relabel_query(session.query(Album))
+        copy_to(query, sio, session.connection().engine, **flags)
+        lines = sio.getvalue().strip().split('\n')
+        assert len(lines) == 4
         assert lines[0].split(',') == ['id', 'name']
+        assert lines[1].split(',') == [str(objects[0].id), objects[0].name]
+
+    def test_rename_columns(self, session, objects):
+        sio = io.StringIO()
+        flags = {'format': 'csv', 'header': True}
+        query = relabel_query(session.query(Album.id, Album.name.label('title')))
+        copy_to(query, sio, session.connection().engine, **flags)
+        lines = sio.getvalue().strip().split('\n')
+        assert len(lines) == 4
+        assert lines[0].split(',') == ['id', 'title']
         assert lines[1].split(',') == [str(objects[0].id), objects[0].name]
 
 class TestCopyFrom:
 
     def test_copy_model(self, session, objects):
         sio = io.StringIO()
-        sio.write('\t'.join(['4', 'The Works']))
+        sio.write(u'\t'.join(['4', 'The Works']))
         sio.seek(0)
         copy_from(sio, Album, session.connection().engine)
         assert session.query(Album).count() == len(objects) + 1
@@ -74,7 +96,7 @@ class TestCopyFrom:
 
     def test_copy_table(self, session, objects):
         sio = io.StringIO()
-        sio.write('\t'.join(['4', 'The Works']))
+        sio.write(u'\t'.join(['4', 'The Works']))
         sio.seek(0)
         copy_from(sio, Album.__table__, session.connection().engine)
         assert session.query(Album).count() == len(objects) + 1
@@ -85,8 +107,8 @@ class TestCopyFrom:
     def test_copy_csv(self, session, objects):
         sio = io.StringIO()
         sio.write(
-            '\n'.join([
-                ','.join(['id', 'name']),
+            u'\n'.join([
+                ','.join(['aid', 'name']),
                 ','.join(['4', 'The Works'])
             ])
         )
