@@ -9,7 +9,7 @@ python:
 addons:
   postgresql: "9.4"
 before_install:
-  - psql -c 'create database "export-test"' -U postgres
+  - psql -c 'create database "copy-test"' -U postgres
   - travis_retry pip install -U pip wheel
 install:
   - travis_retry pip install -U .
