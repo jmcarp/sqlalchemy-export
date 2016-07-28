@@ -50,7 +50,7 @@ def copy_from(source, dest, engine, **flags):
     :param dest: SQLAlchemy model or table
     :param engine: SQLAlchemy engine
     """
-    name = dest.__tablename__ if is_model(dest) else dest.name
+    name = dest.__table__.fullname if is_model(dest) else dest.fullname
     conn = engine.raw_connection()
     cursor = conn.cursor()
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
