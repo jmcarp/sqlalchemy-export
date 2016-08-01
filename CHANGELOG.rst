@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.2.1 (2016-08-01)
+++++++++++++++++++
+* Copy by schema and table name. Thanks @bjab!
+
 0.2.0 (2016-03-18)
 ++++++++++++++++++
 * Add `copy_to` wrapper.
