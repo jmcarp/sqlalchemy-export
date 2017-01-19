@@ -50,11 +50,11 @@ def copy_from(source, dest, engine, **flags):
     :param dest: SQLAlchemy model or table
     :param engine: SQLAlchemy engine
     """
-    name = dest.__table__.fullname if is_model(dest) else dest.fullname
+    tbl = dest.__table__ if is_model(dest) else dest
     conn = engine.raw_connection()
     cursor = conn.cursor()
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
-    copy = 'COPY {} FROM STDOUT {}'.format(name, formatted_flags)
+    copy = 'COPY "{}"."{}" FROM STDIN {}'.format(tbl.schema, tbl.name, formatted_flags)
     cursor.copy_expert(copy, source)
     conn.commit()
     conn.close()
