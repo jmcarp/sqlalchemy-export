@@ -31,6 +31,7 @@ def read(fname):
         content = fp.read()
     return content
 
+
 setup(
     name='sqlalchemy-postgres-copy',
     version=find_version('postgres_copy/__init__.py'),
