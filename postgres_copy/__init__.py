@@ -54,7 +54,11 @@ def copy_from(source, dest, engine, **flags):
     conn = engine.raw_connection()
     cursor = conn.cursor()
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
-    copy = 'COPY "{}"."{}" FROM STDIN {}'.format(tbl.schema, tbl.name, formatted_flags)
+    copy = 'COPY "{}"."{}" FROM STDIN {}'.format(
+        tbl.schema or 'public',
+        tbl.name,
+        formatted_flags
+    )
     cursor.copy_expert(copy, source)
     conn.commit()
     conn.close()
