@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.2.2 (2017-01-20)
+++++++++++++++++++
+* Handle special characters in table names. Thanks @JacobHayes!
+
 0.2.1 (2016-08-01)
 ++++++++++++++++++
 * Copy by schema and table name. Thanks @bjab!

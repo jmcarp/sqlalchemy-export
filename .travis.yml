@@ -6,8 +6,8 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-addons:
-  postgresql: "9.4"
+services:
+  - postgres
 before_install:
   - psql -c 'create database "copy-test"' -U postgres
   - travis_retry pip install -U pip wheel
@@ -15,5 +15,5 @@ install:
   - travis_retry pip install -U .
   - travis_retry pip install -U -r dev-requirements.txt
 script:
-  - py.test
+  - pytest
   - flake8 .

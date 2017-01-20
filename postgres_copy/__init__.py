@@ -57,7 +57,7 @@ def copy_from(source, dest, engine, **flags):
     copy = 'COPY "{}"."{}" FROM STDIN {}'.format(
         tbl.schema or 'public',
         tbl.name,
-        formatted_flags
+        formatted_flags,
     )
     cursor.copy_expert(copy, source)
     conn.commit()
