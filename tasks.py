@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-from invoke import task, run
+from invoke import task
 
 @task
-def clean():
-    run('rm -rf dist')
-    run('rm -rf build')
-    run('rm -rf sqlalchemy_postgres_copy.egg-info')
+def clean(ctx):
+    ctx.run('rm -rf dist')
+    ctx.run('rm -rf build')
+    ctx.run('rm -rf sqlalchemy_postgres_copy.egg-info')
 
 @task
-def publish(test=False):
+def publish(ctx, test=False):
     """Publish to the cheeseshop."""
-    clean()
+    clean(ctx)
     if test:
-        run('python setup.py register -r test sdist bdist_wheel', echo=True)
-        run('twine upload dist/* -r test', echo=True)
+        ctx.run('python setup.py register -r test sdist bdist_wheel', echo=True)
+        ctx.run('twine upload dist/* -r test', echo=True)
     else:
-        run('python setup.py register sdist bdist_wheel', echo=True)
-        run('twine upload dist/*', echo=True)
+        ctx.run('python setup.py register sdist bdist_wheel', echo=True)
+        ctx.run('twine upload dist/*', echo=True)
