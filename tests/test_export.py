@@ -124,7 +124,7 @@ class TestCopyFrom(object):
         sio = io.StringIO()
         sio.write(u'\t'.join(['The Works', '4']))
         sio.seek(0)
-        copy_from(sio, Album, session.connection().engine, columns=('name', 'id', ))
+        copy_from(sio, Album, session.connection().engine, columns=('name', 'aid', ))
         assert session.query(Album).count() == len(objects) + 1
         row = session.query(Album).filter_by(id=4).first()
         assert row.id == 4
