@@ -35,7 +35,7 @@ def objects(session):
     finally:
         engine.execute(Album.__table__.delete())
 
-class TestCopyTo:
+class TestCopyTo(object):
 
     def test_copy_query(self, session, objects):
         sio = io.StringIO()
@@ -60,7 +60,7 @@ class TestCopyTo:
         assert lines[0].split(',') == ['aid', 'name']
         assert lines[1].split(',') == [str(objects[0].id), objects[0].name]
 
-class TestCopyRename:
+class TestCopyRename(object):
 
     def test_rename_model(self, session, objects):
         sio = io.StringIO()
@@ -82,7 +82,7 @@ class TestCopyRename:
         assert lines[0].split(',') == ['id', 'title']
         assert lines[1].split(',') == [str(objects[0].id), objects[0].name]
 
-class TestCopyFrom:
+class TestCopyFrom(object):
 
     def test_copy_model(self, session, objects):
         sio = io.StringIO()
@@ -115,6 +115,16 @@ class TestCopyFrom:
         sio.seek(0)
         flags = {'format': 'csv', 'header': True}
         copy_from(sio, Album, session.connection().engine, **flags)
+        assert session.query(Album).count() == len(objects) + 1
+        row = session.query(Album).filter_by(id=4).first()
+        assert row.id == 4
+        assert row.name == 'The Works'
+
+    def test_copy_columns(self, session, objects):
+        sio = io.StringIO()
+        sio.write(u'\t'.join(['The Works', '4']))
+        sio.seek(0)
+        copy_from(sio, Album, session.connection().engine, columns=('name', 'id', ))
         assert session.query(Album).count() == len(objects) + 1
         row = session.query(Album).filter_by(id=4).first()
         assert row.id == 4

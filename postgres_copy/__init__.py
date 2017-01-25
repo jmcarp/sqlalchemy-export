@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapper, class_mapper
 from sqlalchemy.sql.operators import ColumnOperators
 from sqlalchemy.dialects import postgresql
 
-__version__ = '0.2.2'
+__version__ = '0.3.0'
 
 def copy_to(source, dest, engine, **flags):
     """Export a query or select to a file. For flags, see the PostgreSQL
@@ -49,14 +49,22 @@ def copy_from(source, dest, engine, **flags):
     :param source: Source file pointer, in read mode
     :param dest: SQLAlchemy model or table
     :param engine: SQLAlchemy engine
+    :param **flags: options passed through to COPY
+
+    The special `columns` flag can be set to a tuple of strings to specify the column
+    order. Passing `header` alone will not handle out of order columns, it simply tells
+    postgres to ignore the first line of `source`.
     """
     tbl = dest.__table__ if is_model(dest) else dest
     conn = engine.raw_connection()
     cursor = conn.cursor()
+    columns = flags.pop('columns', None)
+    formatted_columns = '({})'.format(','.join(columns)) if columns else ''
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
-    copy = 'COPY "{}"."{}" FROM STDIN {}'.format(
+    copy = 'COPY "{}"."{}" {} FROM STDIN {}'.format(
         tbl.schema or 'public',
         tbl.name,
+        formatted_columns,
         formatted_flags,
     )
     cursor.copy_expert(copy, source)
