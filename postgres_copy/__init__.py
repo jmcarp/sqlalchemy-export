@@ -23,6 +23,7 @@ def copy_to(source, dest, engine, **flags):
     :param source: SQLAlchemy query or select
     :param dest: Destination file pointer, in write mode
     :param engine: SQLAlchemy engine
+    :param **flags: Options passed through to COPY
     """
     dialect = postgresql.dialect()
     statement = getattr(source, 'statement', source)
@@ -35,7 +36,7 @@ def copy_to(source, dest, engine, **flags):
     cursor.copy_expert(copy, dest)
     conn.close()
 
-def copy_from(source, dest, engine, **flags):
+def copy_from(source, dest, engine, columns=(), **flags):
     """Import a table from a file. For flags, see the PostgreSQL documentation
     at http://www.postgresql.org/docs/9.5/static/sql-copy.html.
 
@@ -49,16 +50,16 @@ def copy_from(source, dest, engine, **flags):
     :param source: Source file pointer, in read mode
     :param dest: SQLAlchemy model or table
     :param engine: SQLAlchemy engine
-    :param **flags: options passed through to COPY
+    :param columns: Optional tuple of columns
+    :param **flags: Options passed through to COPY
 
-    The special `columns` flag can be set to a tuple of strings to specify the column
+    The `columns` flag can be set to a tuple of strings to specify the column
     order. Passing `header` alone will not handle out of order columns, it simply tells
     postgres to ignore the first line of `source`.
     """
     tbl = dest.__table__ if is_model(dest) else dest
     conn = engine.raw_connection()
     cursor = conn.cursor()
-    columns = flags.pop('columns', None)
     formatted_columns = '({})'.format(','.join(columns)) if columns else ''
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
     copy = 'COPY "{}"."{}" {} FROM STDIN {}'.format(
