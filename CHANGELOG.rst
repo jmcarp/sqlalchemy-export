@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.3.0 (2017-01-27)
+++++++++++++++++++
+* Expose column order in copy_from. Thanks @JacobHayes!
+
 0.2.2 (2017-01-20)
 ++++++++++++++++++
 * Handle special characters in table names. Thanks @JacobHayes!
