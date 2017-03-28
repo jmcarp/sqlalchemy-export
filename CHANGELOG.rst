@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.4.0 (2017-03-28)
+++++++++++++++++++
+* Expose column order in copy_from. Thanks @JacobHayes!
+
 0.3.0 (2017-01-27)
 ++++++++++++++++++
 * Expose column order in copy_from. Thanks @JacobHayes!
