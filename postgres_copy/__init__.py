@@ -60,11 +60,11 @@ def copy_from(source, dest, engine, columns=(), **flags):
     tbl = dest.__table__ if is_model(dest) else dest
     conn = engine.raw_connection()
     cursor = conn.cursor()
+    relation = '.'.join('"{}"'.format(part) for part in (tbl.schema, tbl.name) if part)
     formatted_columns = '({})'.format(','.join(columns)) if columns else ''
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
-    copy = 'COPY "{}"."{}" {} FROM STDIN {}'.format(
-        tbl.schema or 'public',
-        tbl.name,
+    copy = 'COPY {} {} FROM STDIN {}'.format(
+        relation,
         formatted_columns,
         formatted_flags,
     )
