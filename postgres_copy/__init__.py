@@ -7,14 +7,14 @@ from sqlalchemy.dialects import postgresql
 
 __version__ = '0.4.0'
 
-def copy_to(source, dest, engine, **flags):
+def copy_to(source, dest, engine_or_conn, **flags):
     """Export a query or select to a file. For flags, see the PostgreSQL
     documentation at http://www.postgresql.org/docs/9.5/static/sql-copy.html.
 
     Examples: ::
         select = MyTable.select()
         with open('/path/to/file.tsv', 'w') as fp:
-            copy_to(select, fp, engine)
+            copy_to(select, fp, conn)
 
         query = session.query(MyModel)
         with open('/path/to/file/csv', 'w') as fp:
@@ -22,43 +22,50 @@ def copy_to(source, dest, engine, **flags):
 
     :param source: SQLAlchemy query or select
     :param dest: Destination file pointer, in write mode
-    :param engine: SQLAlchemy engine
+    :param engine_or_conn: SQLAlchemy engine, connection, or raw_connection
     :param **flags: Options passed through to COPY
+
+    If an existing connection is passed to `engine_or_conn`, it is the caller's
+    responsibility to commit and close.
     """
     dialect = postgresql.dialect()
     statement = getattr(source, 'statement', source)
     compiled = statement.compile(dialect=dialect)
-    conn = engine.raw_connection()
+    conn, autoclose = raw_connection_from(engine_or_conn)
     cursor = conn.cursor()
     query = cursor.mogrify(compiled.string, compiled.params).decode()
     formatted_flags = '({})'.format(format_flags(flags)) if flags else ''
     copy = 'COPY ({}) TO STDOUT {}'.format(query, formatted_flags)
     cursor.copy_expert(copy, dest)
-    conn.close()
+    if autoclose:
+        conn.close()
 
-def copy_from(source, dest, engine, columns=(), **flags):
+def copy_from(source, dest, engine_or_conn, columns=(), **flags):
     """Import a table from a file. For flags, see the PostgreSQL documentation
     at http://www.postgresql.org/docs/9.5/static/sql-copy.html.
 
     Examples: ::
         with open('/path/to/file.tsv') as fp:
-            copy_from(fp, MyTable, engine)
+            copy_from(fp, MyTable, conn)
 
         with open('/path/to/file.csv') as fp:
             copy_from(fp, MyModel, engine, format='csv')
 
     :param source: Source file pointer, in read mode
     :param dest: SQLAlchemy model or table
-    :param engine: SQLAlchemy engine
+    :param engine_or_conn: SQLAlchemy engine, connection, or raw_connection
     :param columns: Optional tuple of columns
     :param **flags: Options passed through to COPY
+
+    If an existing connection is passed to `engine_or_conn`, it is the caller's
+    responsibility to commit and close.
 
     The `columns` flag can be set to a tuple of strings to specify the column
     order. Passing `header` alone will not handle out of order columns, it simply tells
     postgres to ignore the first line of `source`.
     """
     tbl = dest.__table__ if is_model(dest) else dest
-    conn = engine.raw_connection()
+    conn, autoclose = raw_connection_from(engine_or_conn)
     cursor = conn.cursor()
     relation = '.'.join('"{}"'.format(part) for part in (tbl.schema, tbl.name) if part)
     formatted_columns = '({})'.format(','.join(columns)) if columns else ''
@@ -69,8 +76,23 @@ def copy_from(source, dest, engine, columns=(), **flags):
         formatted_flags,
     )
     cursor.copy_expert(copy, source)
-    conn.commit()
-    conn.close()
+    if autoclose:
+        conn.commit()
+        conn.close()
+
+def raw_connection_from(engine_or_conn):
+    """Extract a raw_connection and determine if it should be automatically closed.
+
+    Only connections opened by this package will be closed automatically.
+    """
+    autoclose = False
+    if hasattr(engine_or_conn, 'cursor'):
+        raw = engine_or_conn
+    elif hasattr(engine_or_conn, 'connection'):
+        raw = engine_or_conn.connection
+    else:
+        raw, autoclose = engine_or_conn.raw_connection(), True
+    return raw, autoclose
 
 def format_flags(flags):
     return ', '.join(
