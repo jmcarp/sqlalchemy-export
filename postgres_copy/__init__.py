@@ -85,14 +85,11 @@ def raw_connection_from(engine_or_conn):
 
     Only connections opened by this package will be closed automatically.
     """
-    autoclose = False
     if hasattr(engine_or_conn, 'cursor'):
-        raw = engine_or_conn
-    elif hasattr(engine_or_conn, 'connection'):
-        raw = engine_or_conn.connection
-    else:
-        raw, autoclose = engine_or_conn.raw_connection(), True
-    return raw, autoclose
+        return engine_or_conn, False
+    if hasattr(engine_or_conn, 'connection'):
+        return engine_or_conn.connection, False
+    return engine_or_conn.raw_connection(), True
 
 def format_flags(flags):
     return ', '.join(
