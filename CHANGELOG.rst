@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+0.5.0 (2017-04-07)
+++++++++++++++++++
+* Accept engine or connection. Thanks @JacobHayes!
+
 0.4.0 (2017-03-28)
 ++++++++++++++++++
 * Expose column order in copy_from. Thanks @JacobHayes!
