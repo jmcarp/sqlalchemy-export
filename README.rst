@@ -30,10 +30,10 @@ Usage
     # Export a CSV containing all Queen albums
     query = session.query(Album).filter_by(artist='Queen')
     with open('/path/to/file.csv', 'w') as fp:
-        postgres_copy.copy_from(query, fp, engine, format='csv', header=True)
+        postgres_copy.copy_to(query, fp, engine, format='csv', header=True)
 
     # Import a tab-delimited file
     with open('/path/to/file.tsv') as fp:
-        postgres_copy.copy_to(fp, Album, engine)
+        postgres_copy.copy_from(fp, Album, engine)
 
 .. _COPY: http://www.postgresql.org/docs/9.5/static/sql-copy.html
