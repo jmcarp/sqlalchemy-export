@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapper, class_mapper
 from sqlalchemy.sql.operators import ColumnOperators
 from sqlalchemy.dialects import postgresql
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 
 def copy_to(source, dest, engine_or_conn, **flags):
     """Export a query or select to a file. For flags, see the PostgreSQL
