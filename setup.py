@@ -6,7 +6,13 @@ from setuptools import find_packages
 
 REQUIRES = [
     'six',
-    'psycopg2',
+    # We recommend you install the version of the psycopg2 library
+    # that is right for you (if you don't know, 'psycopg2-binary' will
+    # probably work fine for you).
+    #
+    # https://github.com/psycopg/psycopg2/issues/674
+    #
+    # 'psycopg2',
     'sqlalchemy',
 ]
 
